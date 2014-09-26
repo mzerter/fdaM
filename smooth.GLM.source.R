@@ -1,5 +1,5 @@
-smooth.GLM <- function(argvals, y, fdParobj, weight, fdnames, covariates, 
-                       dfscale, family, control, start) {
+smooth.GLM <- function(argvals, y, fdParobj, weight=NULL, fdnames=list('arguments','replications','variables'), covariates=NULL, 
+                       dfscale=1, family='binomial', control=NULL, start=NULL) {
 
 #SMOOTH.GLM  Smooths discrete curve represented by basis function
 #  expansions fit by penalized least squares.
@@ -127,8 +127,6 @@ nbasis = basisobj$nbasis - length(basisobj$dropind)
 
 #  set default argument values
 
-deffdnames = list('arguments','replications','variables')
-
 # deffdnames = cell(1,3)
 # deffdnames{1} = 'arguments'
 # deffdnames{2} = 'replications'
@@ -139,12 +137,6 @@ deffdnames = list('arguments','replications','variables')
 # paramNames = {     'weight' 'fdnames' 'covariates' 'dfscale' 'family'}
 # paramDflts = {[]     deffdnames      []        1.0     'normal'}
 
-wtvec      = NULL
-fdnames    = deffdnames
-covariates = NULL
-dfscale    = 1
-family     = 'binomial'
-
 # wtvec      = []
 # fdnames    = deffdnames
 # covariates = []
@@ -154,110 +146,116 @@ family     = 'binomial'
 # Which style of calling sequence is being used
 #    name -- value pairs or fixed order?
 
-NameValStyle = true
-if ~isempty(varargin) && nargin <= 7
-   va1 = varargin{1}
-   if ~ischar(va1) || isempty(va1)
-      NameValStyle = false
-   end
-end
+# NameValStyle = true
+# if ~isempty(varargin) && nargin <= 7
+#    va1 = varargin{1}
+#    if ~ischar(va1) || isempty(va1)
+#       NameValStyle = false
+#    end
+# end
 
-if (is.null())
 
-if NameValStyle
+# if NameValStyle
+# 
+#     # Process optional number of name -- value pairs.
+# 
+#     nargpr = nargin - 3
+#     if floor(nargpr/2)*2 ~= nargpr
+#         error(['The number of argments after the first three ', ...
+#             'is not an even number.'])
+#     end
+# 
+#     for ipr=52nargin
+#         ArgName = varargin{ipr-4}
+#         if     strcmp(ArgName, 'w')         || ...
+#                strcmp(ArgName, 'wt')        || ...
+#                strcmp(ArgName, 'wgt')       || ...
+#                strcmp(ArgName, 'weight')    || ...
+#                strcmp(ArgName, 'weights')
+#             wtvec      = varargin{ipr-3}
+#         elseif strcmp(ArgName, 'f')         || ...
+#                strcmp(ArgName, 'fdname')    || ...
+#                strcmp(ArgName, 'fdnames')
+#             fdnames    = varargin{ipr-3}
+#         elseif strcmp(ArgName, 'c')         || ...
+#                strcmp(ArgName, 'cov')       || ...
+#                strcmp(ArgName, 'covariate') || ...
+#                strcmp(ArgName, 'covariates')
+#             covariates = varargin{ipr-3}
+#         elseif strcmp(ArgName, 'f')         || ...
+#                strcmp(ArgName, 'fam')       || ...
+#                strcmp(ArgName, 'family')
+#             family = varargin{ipr-3}
+#         elseif strcmp(ArgName, 'd')         || ...
+#                strcmp(ArgName, 'df')        || ...
+#                strcmp(ArgName, 'dfscl')     || ...
+#                strcmp(ArgName, 'dfscale')
+#             dfscale    = varargin{ipr-3}
+#         elseif strcmp(ArgName, 'con')       || ...
+#                strcmp(ArgName, 'control')
+#             control    = varargin{ipr-3}
+#         elseif strcmp(ArgName, 's')         || ...
+#                strcmp(ArgName, 'st')        || ...
+#                strcmp(ArgName, 'start')
+#             start    = varargin{ipr-3}
+#         else
+#             error('An argument name is unrecognizable.')
+#         end
+#     end
+# else
+# 
+#     #  process argument values in fixed order
+# 
+#     if nargin >= 4,  wtvec      = varargin{1}   end
+#     if nargin >= 5,  fdnames    = varargin{2}   end
+#     if nargin >= 6,  covariates = varargin{3}   end
+#     if nargin >= 7,  family     = varargin{4}   end
+#     if nargin == 8,  dfscale    = varargin{5}   end
+#     if nargin > 7
+#         error('More than seven non-named arguments found.')
+#     end
+# end
 
-    # Process optional number of name -- value pairs.
 
-    nargpr = nargin - 3
-    if floor(nargpr/2)*2 ~= nargpr
-        error(['The number of argments after the first three ', ...
-            'is not an even number.'])
-    end
 
-    for ipr=52nargin
-        ArgName = varargin{ipr-4}
-        if     strcmp(ArgName, 'w')         || ...
-               strcmp(ArgName, 'wt')        || ...
-               strcmp(ArgName, 'wgt')       || ...
-               strcmp(ArgName, 'weight')    || ...
-               strcmp(ArgName, 'weights')
-            wtvec      = varargin{ipr-3}
-        elseif strcmp(ArgName, 'f')         || ...
-               strcmp(ArgName, 'fdname')    || ...
-               strcmp(ArgName, 'fdnames')
-            fdnames    = varargin{ipr-3}
-        elseif strcmp(ArgName, 'c')         || ...
-               strcmp(ArgName, 'cov')       || ...
-               strcmp(ArgName, 'covariate') || ...
-               strcmp(ArgName, 'covariates')
-            covariates = varargin{ipr-3}
-        elseif strcmp(ArgName, 'f')         || ...
-               strcmp(ArgName, 'fam')       || ...
-               strcmp(ArgName, 'family')
-            family = varargin{ipr-3}
-        elseif strcmp(ArgName, 'd')         || ...
-               strcmp(ArgName, 'df')        || ...
-               strcmp(ArgName, 'dfscl')     || ...
-               strcmp(ArgName, 'dfscale')
-            dfscale    = varargin{ipr-3}
-        elseif strcmp(ArgName, 'con')       || ...
-               strcmp(ArgName, 'control')
-            control    = varargin{ipr-3}
-        elseif strcmp(ArgName, 's')         || ...
-               strcmp(ArgName, 'st')        || ...
-               strcmp(ArgName, 'start')
-            start    = varargin{ipr-3}
-        else
-            error('An argument name is unrecognizable.')
-        end
-    end
-else
-
-    #  process argument values in fixed order
-
-    if nargin >= 4,  wtvec      = varargin{1}   end
-    if nargin >= 5,  fdnames    = varargin{2}   end
-    if nargin >= 6,  covariates = varargin{3}   end
-    if nargin >= 7,  family     = varargin{4}   end
-    if nargin == 8,  dfscale    = varargin{5}   end
-    if nargin > 7
-        error('More than seven non-named arguments found.')
-    end
-end
 
 #  check WTVEC
 
-[wtvec, onewt] = wtcheck(n, wtvec)
-if onewt
-    wtvec = ones(n,1)
-end
+wtlist = wtcheck(n, weight)
+if (wtlist$onewt) {wtvec = matrix(1,n,1)}
+
+
+
 
 #  check FDNAMES
 
-if ~iscell(fdnames)
-    error('smooth.basis.LSfdnames', ...
-          'Optional argument FDNAMES is not a cell array.')
-end
+if (is.list(fdnames))
+{
+    stop('Optional argument FDNAMES is not a cell array.')
+}
 
-if length(fdnames) ~= 3
-    error('smooth.basis.LSfdnames', ...
-          'Optional argument FDNAMES is not of length 3.')
-end
+
+if (length(fdnames) != 3)
+{
+    stop('Optional argument FDNAMES is not of length 3.')
+}
 
 #  check COVARIATES
 
 q = 0
-if ~isempty(covariates)
-    if ~isnumeric(covariates)
-        error('smooth.basis.LScovariates', ...
-            'Optional argument COVARIATES is not numeric.')
-    end
-    if size(covariates,1) ~= n
-        error('smooth.basis.LScovariates', ...
-            'Optional argument COVARIATES has incorrect number of rows.')
-    end
+
+if (!is.null(covariates))
+{
+    if (!is.numeric(covariates))
+    {      
+      stop('Optional argument COVARIATES is not numeric.')
+    }
+    if (dim(covariates)[1] != n)
+    {
+      stop('Optional argument COVARIATES has incorrect number of rows.')
+    }
     q = size(covariates,2)
-end
+}
 
 #  ------------------------------------------------------------------
 #                set up the linear equations for smoothing
@@ -267,8 +265,8 @@ end
 
 basismat  = eval.basis(argvals, basisobj)
 
-if n >= nbasis || lambda > 0
-
+if (n >= nbasis || lambda > 0)
+{
     #  The following code is for the coefficients completely determined
 
     #  set up additional rows of the least squares problem for the
@@ -277,10 +275,12 @@ if n >= nbasis || lambda > 0
     basismat0 = basismat
     y0        = y
 
-    if lambda > 0
+    if (lambda > 0)
+    {
 #         nderiv  = getnderiv(Lfdobj)
         penmat  = eval.penalty(basisobj, Lfdobj)
-        lamRmat = lambda.*penmat
+        lamRmat = lambda*penmat
+
 #         [V,D] = eig(full(penmat))
 #         Dvec  = diag(D)
 #         [Dsort, Isort] = sort(Dvec, 'descend')
@@ -315,67 +315,86 @@ if n >= nbasis || lambda > 0
 #                 y(,,ivar) = [y(,,ivar) zeros(n-nderiv,ncurve)]
 #             end
 #         end
+}
     else
-        lamRmat = []
-    end
+    {
+        lamRmat = NULL
+    }
 
     #  augment BASISMAT0 and BASISMAT by the covariate matrix
     #  if it is supplied
 
-    if ~isempty(covariates)
+    if (!is.null(covariates))
+      {
+      
         sparsewrd = issparse(basismat0)
         basismat0 = full([basismat0, covariates])
         basismat  = full([basismat,  covariates])
-        if sparsewrd
-            basismat0 = sparse(basismat0)
-            basismat  = sparse(basismat)
-        end
-        if ~isempty(lamRmat)
-            lamRmat = [[lamRmat,         zeros(nbasis,q)]
-                       [zeros(q,nbasis), zeros(q)       ]]
-        end
-    end
+        
+        if (sparsewrd)
+        {
+          basismat0 = sparse(basismat0)
+          basismat  = sparse(basismat)
+          
+        }
+        
+        if (!is.null(lamRmat))
+          {        
+#           lamRmat = [[lamRmat,         zeros(nbasis,q)]
+#                      [zeros(q,nbasis), zeros(q)       ]]
+            lamRmat = cbind(lamRmat,matrix(0,nbasis,q),matrix(0,q,nbasis),matrix(0,q,q))
+          }
+      }
 
     #  ------------------------------------------------------------------
     #               compute solution using Matlab function glmfit
     #  ------------------------------------------------------------------
 
-    if ndim < 3
-        coef  = zeros(nbasis,ncurve)
-        dev   = zeros(ncurve,1)
+    if (ndim < 3)
+    {
+        coef  = matrix(0,nbasis,ncurve)
+        dev   = matrix(0,ncurve,1)
         [coef,dev] = glm.fda(basismat, y, family, lamRmat, wtvec)
+    }
     else
-        coef  = zeros(nbasis,ncurve,nvar)
-        dev   = zeros(ncurve,nvar)
-        for ivar=1nvar
-            yi = squeeze(y(,,ivar))
-            [coefi,devi] = glm.fda(basismat, yi, family, lamRmat, wtvec)
-            coef(,,ivar) = coefi
-            dev(,ivar)    = devi
+    {
+        coef  = array(0,c(nbasis,ncurve,nvar))
+        dev   = matrix(0,ncurve,nvar)
+        for (ivar in 1:nvar)
+        {
+            yi = y[,,ivar,drop=FALSE]
+            result = glm.fda(basismat, yi, family, lamRmat, wtvec)
+            coef[,,ivar]  = coefi
+            dev[,ivar]    = devi
             stats{,ivar}  = statsi
-        end
-    end
+        }
+    }
+    
 
     #  compute basismat*R^{-1}
 
-    if isempty(lamRmat)
-        M = basismat'*basismat
+    if is.null(lamRmat)
+    {
+        M = t(basismat)%*%basismat
+    }
     else
-        M = basismat'*basismat + lamRmat
-    end
+    {
+       M = t(basismat)%*%basismat + lamRmat
+    }
 
-    #  compute map from y to c
+      #  compute map from y to c
+  
+      y2cMap = solve(M,t(basismat))
+  
+      #  compute degrees of freedom of smooth
+  
+      df = sum(diag(basismat%*%y2cMap))
 
-    y2cMap = M\basismat'
-
-    #  compute degrees of freedom of smooth
-
-    df = sum(diag(basismat*y2cMap))
-
-else
-    error(['The number of basis functions exceeds the number of ', ...
-           'points to be smoothed.'])
-end
+    }
+    else
+    {
+      stop('The number of basis functions exceeds the number of points to be smoothed.')
+    }
 
 #  ------------------------------------------------------------------
 #            compute SSE, yhat, GCV and other fit summaries
@@ -383,34 +402,46 @@ end
 
 #  compute error sum of squares
 
-if ndim < 3
-    yhat = basismat0 * coef
-    SSE  = sum((y0 - yhat).^2)
+if (ndim < 3)
+{
+    yhat = basismat0 %*% coef
+    ydiff = (y0 - yhat)
+    SSE  = sum(ydiff %*% ydiff)
+}
 else
-    SSE = zeros(nvar,ncurve)
-    for ivar = 1nvar
-        coefi = squeeze(coef(,,ivar))
-        yhati = basismat * coefi
-        yi    = squeeze(y(,,ivar))
-        SSE(ivar,) = sum((yi - yhati).^2)
-    end
-end
+{
+    SSE = matrix(0,nvar,ncurve)
+    for (ivar in 1:nvar)
+    {
+      coefi = coef[,,ivar, drop=FALSE]
+      yhati = basismat %*% coefi
+      yi    = y[,,ivar, drop=FALSE]
+      ydiff =(yi - yhati)
+      SSE[ivar,] = sum(ydiff %*% ydiff)
+    }
+}    
 
 #  compute  GCV index
 
-if df < n
-    gcv = (SSE./n)./((n - dfscale*df)/n)^2
+if (df < n)
+{
+    gcv = (SSE/n)/((n - dfscale%*%df)/n)^2
+}
 else
+{
     gcv = NaN
-end
+}
 
 #  set up the functional data object
 
-if ndim < 3
-    fdobj = fd(coef(1nbasis,),   basisobj, fdnames)
+if (ndim < 3)
+{
+  fdobj = fd(coef(1nbasis,),   basisobj, fdnames)
+}
 else
-    fdobj = fd(coef(1nbasis,,), basisobj, fdnames)
-end
+{
+  fdobj = fd(coef(1nbasis,,), basisobj, fdnames)
+}
 
 #  set up the regression coefficient matrix beta
 
@@ -947,6 +978,8 @@ end
 #  tests for function smooth.GLM
 
 #  ----------------  normal link with no covariates  --------------------
+
+
 
 n       = 101
 argvals = linspace(0,2*pi,n)'
