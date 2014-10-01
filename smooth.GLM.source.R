@@ -471,7 +471,8 @@ return(list(fdobj = fdobj, beta = beta, df = df, gcv =gcv, SSE = SSE, dev =dev, 
 #  -----------------------------------------------------------------------------
 #  -----------------------------------------------------------------------------
 
-glm.fda <- function(Xmat, Ymat, distr, lamRmat, Wtvec, Bvec0, addterm)
+glm.fda <- function(Xmat, Ymat, distr, lamRmat, Wtvec, Bvec0, addterm) 
+  {
 #GLM.FDA Fits a generalized linear model with regularization.
 #  This function is called by function smooth.GLM
 #  Arguments
@@ -1070,8 +1071,9 @@ else
       {
         devFni  = devFn{i}
         di      = devFni(mu[i,],Ymat[,i])
-        Deviance[i,] = sum((Wtvec[i] %i% matrix(1,1,ncurve)) * di)
+        Deviance[i,] = sum((Wtvec[i] %*% matrix(1,1,ncurve)) * di)
       }
+  }
 }
 
 
@@ -1084,17 +1086,18 @@ else
 
 #  ----------------  normal link with no covariates  --------------------
 
+library(pracma)
 
 
 n       = 101
-argvals = linspace(0,2*pi,n)'
+argvals = linspace(0,2*pi,n)
 y0      = sin(2*argvals)
 y02     = cos(2*argvals)
 sig     = 0.2
-y       = y0 + sig.*randn(n,1)
-y       = [y, y02 + sig.*randn(n,1)]
+y       = y0 + sig %*% randn(n,1)
+y       = c(y, y02 + sig %*% randn(n,1))
 
-basisobj = create.bspline.basis([0,2*pi],n+2)
+basisobj = create.bspline.basis(c(0,2*pi),n+2)
 
 basismat = eval.basis(argvals, basisobj)
 
@@ -1102,9 +1105,9 @@ Lfdobj = int2Lfd(2)
 penmat = eval.penalty(basisobj,Lfdobj)
 
 lambda  = 1e-1
-lamRmat = lambda.*penmat
+lamRmat = lambda * penmat
 
-[coef,Deviance] = glm.fda(basismat, y, 'normal', lamRmat)
+glmresult = glm.fda(basismat, y, 'normal', lamRmat)
 
 fdobj = fd(coef,basisobj)
 
