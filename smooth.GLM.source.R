@@ -133,7 +133,7 @@ smoothResult$SSE
 
 smoothResult$dev
 
-stats{}
+# stats{}
 
 #  ----------------  poisson link with no covariates  --------------------
 

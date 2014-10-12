@@ -1,5 +1,5 @@
 fdParcheck <- function(fdParobj){
-  if (is.fdPar(fdParobj)) {
+  if (!is.fdPar(fdParobj)) {
     
     if (is.fd(fdParobj) || is.basis(fdParobj)) {
       
